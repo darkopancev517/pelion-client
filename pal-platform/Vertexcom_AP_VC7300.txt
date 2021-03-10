@@ -1,0 +1,18 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Vertexcom_AP_VC7300 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+######################
+# freertos 202002.00
+######################
+- Clone https://github.com/aws/amazon-freertos.git at 202002.00 to /Users/darko/projects/ARM/mbed-cloud-client-example/pal-platform/SDK/Vertexcom_AP_VC7300/amazon-freertos
+#################################################
+# lwip 79cd89f99d1032cc5375569e5b24c375b9d230fa
+#################################################
+- Clone https://github.com/lwip-tcpip/lwip.git at 79cd89f99d1032cc5375569e5b24c375b9d230fa to /Users/darko/projects/ARM/mbed-cloud-client-example/pal-platform/SDK/Vertexcom_AP_VC7300/lwip
+###############
+# cmsis 5.6.0
+###############
+- Clone https://github.com/ARM-software/CMSIS_5.git at 5.6.0 to /Users/darko/projects/ARM/mbed-cloud-client-example/pal-platform/SDK/Vertexcom_AP_VC7300/CMSIS_5
+###################
+# vcdrivers 1.1.3
+###################
+- Clone https://github.com/darkostack/vcdrivers.git at vcdrivers-1.1.3 to /Users/darko/projects/ARM/mbed-cloud-client-example/pal-platform/SDK/Vertexcom_AP_VC7300/vcdrivers

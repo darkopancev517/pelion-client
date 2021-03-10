@@ -128,6 +128,105 @@
       }
     }
   },
+  "Vertexcom_AP_VC6320": {
+    "comment": "Vertexcom ARM Pelion Software Package",
+    "device": {
+      "name": "VC6320"
+    },
+    "os": {
+      "name": "Vertexcom_FreeRTOS"
+    },
+    "sdk": {
+      "name": "Vertexcom_AP_VC6320",
+      "version": "0.0.1"
+    },
+    "middleware": {
+      "freertos": {
+        "version": "202002.00",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/aws/amazon-freertos.git",
+          "tag": "202002.00",
+          "submodules": {
+            "freertos_kernel": {}
+          }
+        },
+        "to": "SDK/Vertexcom_AP_VC6320/amazon-freertos"
+      },
+      "lwip": {
+        "version": "79cd89f99d1032cc5375569e5b24c375b9d230fa",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/lwip-tcpip/lwip.git",
+          "tag": "79cd89f99d1032cc5375569e5b24c375b9d230fa"
+        },
+        "to": "SDK/Vertexcom_AP_VC6320/lwip"
+      },
+      "cmsis": {
+        "version": "5.6.0",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/ARM-software/CMSIS_5.git",
+          "tag": "5.6.0"
+        },
+        "to": "SDK/Vertexcom_AP_VC6320/CMSIS_5"
+      }
+    }
+  },
+  "Vertexcom_AP_VC7300": {
+    "comment": "Vertexcom ARM Pelion Software Package",
+    "device": {
+      "name": "VC7300"
+    },
+    "os": {
+      "name": "Vertexcom_FreeRTOS"
+    },
+    "sdk": {
+      "name": "Vertexcom_AP_VC7300",
+      "version": "0.0.1"
+    },
+    "middleware": {
+      "freertos": {
+        "version": "202002.00",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/aws/amazon-freertos.git",
+          "tag": "202002.00",
+          "submodules": {
+            "freertos_kernel": {}
+          }
+        },
+        "to": "SDK/Vertexcom_AP_VC7300/amazon-freertos"
+      },
+      "lwip": {
+        "version": "79cd89f99d1032cc5375569e5b24c375b9d230fa",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/lwip-tcpip/lwip.git",
+          "tag": "79cd89f99d1032cc5375569e5b24c375b9d230fa"
+        },
+        "to": "SDK/Vertexcom_AP_VC7300/lwip"
+      },
+      "cmsis": {
+        "version": "5.6.0",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/ARM-software/CMSIS_5.git",
+          "tag": "5.6.0"
+        },
+        "to": "SDK/Vertexcom_AP_VC7300/CMSIS_5"
+      },
+      "vcdrivers": {
+        "version": "1.1.3",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/darkostack/vcdrivers.git",
+          "tag": "vcdrivers-1.1.3"
+        },
+        "to": "SDK/Vertexcom_AP_VC7300/vcdrivers"
+      }
+    }
+  },
   "Renesas_EK_RA6M3": {
     "comment": "Renesas Flexible Software Package",
     "device": {
