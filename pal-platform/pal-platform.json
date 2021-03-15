@@ -198,24 +198,6 @@
         },
         "to": "SDK/Vertexcom_AP_VC7300/amazon-freertos"
       },
-      "lwip": {
-        "version": "79cd89f99d1032cc5375569e5b24c375b9d230fa",
-        "from": {
-          "protocol": "git",
-          "location": "https://github.com/lwip-tcpip/lwip.git",
-          "tag": "79cd89f99d1032cc5375569e5b24c375b9d230fa"
-        },
-        "to": "SDK/Vertexcom_AP_VC7300/lwip"
-      },
-      "cmsis": {
-        "version": "5.6.0",
-        "from": {
-          "protocol": "git",
-          "location": "https://github.com/ARM-software/CMSIS_5.git",
-          "tag": "5.6.0"
-        },
-        "to": "SDK/Vertexcom_AP_VC7300/CMSIS_5"
-      },
       "vcdrivers": {
         "version": "1.1.3",
         "from": {

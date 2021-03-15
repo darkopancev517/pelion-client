@@ -21,22 +21,17 @@ SET(CMAKE_SYSTEM_NAME Generic)
 project(vertexcomFreeRTOS)
 
 set(PDMC_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
-set(LWIP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lwip)
-set(LWIP_PORT_SOURCE_DIR ${FREERTOS_FOLDER}/libraries/3rdparty/lwip_osal/src)
 set(MBEDTLS_SOURCE_DIR ${FREERTOS_FOLDER}/libraries/3rdparty/mbedtls/library)
 set(PORTING_SRC_FOLDER ${PDMC_FOLDER}/source/platform/Vertexcom_AP_VC7300)
 set(VCDRIVER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/source)
 
 ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR})
-ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/vc_freertos_port)
-ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_5/CMSIS/Core/Include)
-ADD_GLOBALDIR(${FREERTOS_FOLDER}/freertos_kernel/include)
 ADD_GLOBALDIR(${FREERTOS_FOLDER}/libraries/3rdparty/mbedtls/include/)
 ADD_GLOBALDIR(${FREERTOS_FOLDER}/libraries/3rdparty/mbedtls/include/mbedtls)
 ADD_GLOBALDIR(${FREERTOS_FOLDER}/libraries/abstractions/pkcs11/mbedtls)
-ADD_GLOBALDIR(${LWIP_DIR}/src/include)
 ADD_GLOBALDIR(${PDMC_FOLDER}/mbed-cloud-client/mbed-client-pal/Source/Port/Reference-Impl/OS_Specific/Vertexcom_AP_VC7300/Board_Specific/TARGET_VC7300)
 ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/include)
+ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/include/cmsis)
 ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/source/sirius)
 
 set(VCDRIVER_SOURCES
