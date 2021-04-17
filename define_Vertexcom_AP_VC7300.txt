@@ -29,8 +29,6 @@ add_definitions(-DMBED_TRACE_CONFIG=TRACE_ACTIVE_LEVEL_ALL)
 add_definitions(-DFLASHIAP_APP_ROM_END_ADDR=0x00200000)
 add_definitions(-DCOMPONENT_FLASHIAP=1)
 
-# For FreeRTOS configs beginning with configUSE* or -Dconfig, please use FreeRTOSConfig.h file instead.
-
 ##### PORT TESTS #####
 add_definitions(-DPAL_SKIP_TEST_MODULE_SOTP=1)
 add_definitions(-DPAL_SKIP_TEST_MODULE_FILESYSTEM=1)

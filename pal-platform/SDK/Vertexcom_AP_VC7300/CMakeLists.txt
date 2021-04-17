@@ -18,17 +18,16 @@
 cmake_minimum_required (VERSION 2.8)
 SET(CMAKE_SYSTEM_NAME Generic)
 
-project(vertexcomFreeRTOS)
+project(vertexcomPlatform)
 
 set(PDMC_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
-set(MBEDTLS_SOURCE_DIR ${FREERTOS_FOLDER}/libraries/3rdparty/mbedtls/library)
+set(MBEDTLS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/library)
 set(PORTING_SRC_FOLDER ${PDMC_FOLDER}/source/platform/Vertexcom_AP_VC7300)
 set(VCDRIVER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/source)
 
 ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR})
-ADD_GLOBALDIR(${FREERTOS_FOLDER}/libraries/3rdparty/mbedtls/include/)
-ADD_GLOBALDIR(${FREERTOS_FOLDER}/libraries/3rdparty/mbedtls/include/mbedtls)
-ADD_GLOBALDIR(${FREERTOS_FOLDER}/libraries/abstractions/pkcs11/mbedtls)
+ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include/)
+ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include/mbedtls)
 ADD_GLOBALDIR(${PDMC_FOLDER}/mbed-cloud-client/mbed-client-pal/Source/Port/Reference-Impl/OS_Specific/Vertexcom_AP_VC7300/Board_Specific/TARGET_VC7300)
 ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/include)
 ADD_GLOBALDIR(${CMAKE_CURRENT_SOURCE_DIR}/vcdrivers/include/cmsis)
@@ -119,7 +118,6 @@ set(MBEDTLS_SOURCES
     ${MBEDTLS_SOURCE_DIR}/ssl_tls.c
 )
 
-# Some files are commented out due to not available in the current AWS FreeRTOS repo.
 set(MBEDX509_SOURCES
     ${MBEDTLS_SOURCE_DIR}/certs.c
     ${MBEDTLS_SOURCE_DIR}/x509.c

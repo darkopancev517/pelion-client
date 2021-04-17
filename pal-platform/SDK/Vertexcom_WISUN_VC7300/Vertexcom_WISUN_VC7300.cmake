@@ -18,8 +18,8 @@
 cmake_minimum_required (VERSION 3.5)
 SET(CMAKE_SYSTEM_NAME Generic)
 
-set(OS_BRAND Vertexcom_AP_VC7300)
-add_definitions(-D__VERTEXCOM_AP_VC7300__)
+set(OS_BRAND Vertexcom_WISUN_VC7300)
+add_definitions(-D__VERTEXCOM_WISUN_VC7300__)
 
 ######### Configure all Options here ##########
 option(PAL_USE_CMSIS "Include CMSIS in build" OFF)
@@ -32,7 +32,7 @@ option(STORAGE_KVSTORE "Enable KVStore" ON)
 set(PAL_TARGET_DEVICE "VC7300")
 set(MBED_CLOUD_CLIENT_DEVICE VC7300)
 set(TLS_LIBRARY mbedTLS)
-set(NETWORK_STACK LWIP)
+set(NETWORK_STACK WISUN)
 
 #if your target SDK has mbedtls then compile without it's apps and tests
 SET(ENABLE_PROGRAMS OFF CACHE STRING "Avoid compiling mbedtls programs" )
@@ -52,13 +52,10 @@ else()
   message("UPDATE_LINKING defined, setting MBED_APP_START to ${MBED_APP_START} and MBED_APP_SIZE to ${MBED_APP_SIZE}")
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${CMAKE_SOURCE_DIR}/pal-platform/SDK/Vertexcom_AP_VC7300/vc7300.ld -static")
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -T${CMAKE_SOURCE_DIR}/pal-platform/SDK/Vertexcom_AP_VC7300/vc7300.ld -static")
-
 SET_COMPILER_DBG_RLZ_FLAG (CMAKE_EXE_LINKER_FLAGS "-Xlinker --defsym=MBED_APP_START=${MBED_APP_START}")
 SET_COMPILER_DBG_RLZ_FLAG (CMAKE_EXE_LINKER_FLAGS "-Xlinker --defsym=MBED_APP_SIZE=${MBED_APP_SIZE}")
 
 # Do not call include_directories from here. Instead, use define_${target}.txt file.
 
 #Add the SDK folder into build system
-set (EXTRA_CMAKE_DIRS ${EXTRA_CMAKE_DIRS} "${CMAKE_SOURCE_DIR}/pal-platform/SDK/Vertexcom_AP_VC7300")
+set(EXTRA_CMAKE_DIRS ${EXTRA_CMAKE_DIRS} "${CMAKE_SOURCE_DIR}/pal-platform/SDK/Vertexcom_WISUN_VC7300")
