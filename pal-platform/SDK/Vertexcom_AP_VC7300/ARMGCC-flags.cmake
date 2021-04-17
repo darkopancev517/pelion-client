@@ -44,7 +44,7 @@ ENDIF(DEBUG_LOOP_START)
 SET(CMAKE_FLAGS_COMMON_DEBUG "-DDEBUG -g -Og ${CMAKE_FLAGS_EXTRA_DEBUG_LOOP}")
 SET(CMAKE_FLAGS_COMMON_RELEASE "-Og")
 
-SET(CMAKE_COMPILE_FLAGS_BASIS "-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -ffunction-sections -fdata-sections -Wall -Wextra -Wno-unused-parameter -Wno-type-limits -MMD -MP")
+SET(CMAKE_COMPILE_FLAGS_BASIS "-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -ffunction-sections -fdata-sections -MMD -MP")
 
 ### Set ASM flags ###
 SET_COMPILER_DBG_RLZ_FLAG (CMAKE_ASM_FLAGS "${CMAKE_COMPILE_FLAGS_BASIS}")
