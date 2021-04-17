@@ -236,6 +236,15 @@
           "tag": "wsn-1.0.0"
         },
         "to": "SDK/Vertexcom_WISUN_VC7300/wisun"
+      },
+      "mbedtls": {
+        "version": "1.0.0",
+        "from": {
+          "protocol": "git",
+          "location": "https://github.com/darkopancev517/mbedtls.git",
+          "tag": "mbedtls-1.0.0"
+        },
+        "to": "SDK/Vertexcom_WISUN_VC7300/mbedtls"
       }
     }
   },
