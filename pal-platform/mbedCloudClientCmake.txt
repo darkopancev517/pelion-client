@@ -114,10 +114,28 @@ foreach(TEST_LIB ${TEST_LIBS})
     endif()
 
     add_executable (${TEST_LIB}.elf ${Additional_SRC})
-        if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-                TARGET_LINK_LIBRARIES(${TEST_LIB}.elf -Wl,--start-group)
+
+    if (${OS_BRAND} MATCHES Vertexcom_WISUN_VC7300)
+        if (${TEST_LIB} MATCHES vertexcom_wisun_bootloader)
+            target_link_libraries(${TEST_LIB}.elf -T${PROJECT_BINARY_DIR}/pelion-client/vertexcom_wisun_bootloader.ld)
+        else()
+            target_link_libraries(${TEST_LIB}.elf -T${PROJECT_BINARY_DIR}/pelion-client/vertexcom_wisun_firmware.ld)
         endif()
-    target_link_libraries (${TEST_LIB}.elf  ${TEST_LIB} ${SRC_LIBS} ${PLATFORM_LIBS} ) # SRC_LIBS appear twice to resolve linker dependency issues between pal and tls static libraries
+    endif()
+
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        TARGET_LINK_LIBRARIES(${TEST_LIB}.elf -Wl,--start-group)
+    endif()
+
+    if (${OS_BRAND} MATCHES Vertexcom_WISUN_VC7300)
+        if (${TEST_LIB} MATCHES vertexcom_wisun_bootloader)
+            target_link_libraries(${TEST_LIB}.elf ${TEST_LIB} ${PLATFORM_BOOTLOADER_LIBS})
+        else()
+            target_link_libraries(${TEST_LIB}.elf ${TEST_LIB} ${SRC_LIBS} ${PLATFORM_LIBS})
+        endif()
+    else()
+        target_link_libraries(${TEST_LIB}.elf ${TEST_LIB} ${SRC_LIBS} ${PLATFORM_LIBS})
+    endif()
 
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
         target_link_libraries(${TEST_LIB}.elf debug m)

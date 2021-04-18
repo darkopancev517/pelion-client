@@ -57,3 +57,92 @@ CREATE_TEST_LIBRARY(mbedCloudClientExample "${MBED_CLOUD_CLIENT_EXAMPLE_SRC}" ""
 
 target_link_libraries(mbedCloudClientExample mbedCloudClient platformCommon mbedClientSharedObjects)
 
+if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
+    set(VERTEXCOM_WISUN_BOOTLOADER_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/dummies/dummy_bootloader.c)
+    set(VERTEXCOM_WISUN_FIRMWARE_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/dummies/dummy_firmware.c)
+    set(VERTEXCOM_WISUN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pal-platform/SDK/Vertexcom_WISUN_VC7300/wisun)
+    set(VERTEXCOM_WISUN_BIN_DIR ${PROJECT_BINARY_DIR}/../${CMAKE_BUILD_TYPE})
+
+    add_definitions(-DVCRTOS_PROJECT_CONFIG_FILE="vcrtos-project-config.h")
+    add_definitions(-DVCRTOS_VERSION="1.2.2")
+
+    CREATE_TEST_LIBRARY(vertexcom_wisun_bootloader "${VERTEXCOM_WISUN_BOOTLOADER_SRCS}" "")
+
+    # wisun bootloader linker script preprocessing
+    add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/vertexcom_wisun_bootloader.ld
+        COMMAND ${CMAKE_C_COMPILER}
+        -E -P ${VERTEXCOM_WISUN_DIR}/mcu/vc7300a/ARM/linker/vc7300a_bootloader.ld.S
+        -include ${VERTEXCOM_WISUN_DIR}/include/autoconf.h
+        -include ${VERTEXCOM_WISUN_DIR}/include/param.h
+        -o ${PROJECT_BINARY_DIR}/vertexcom_wisun_bootloader.ld
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_bootloader_linker ALL DEPENDS ${PROJECT_BINARY_DIR}/vertexcom_wisun_bootloader.ld)
+    add_dependencies(vertexcom_wisun_bootloader PLATFORM_BOOTLOADER_LIBS vertexcom_wisun_bootloader_linker)
+    target_link_libraries(vertexcom_wisun_bootloader PLATFORM_BOOTLOADER_LIBS)
+
+    CREATE_TEST_LIBRARY(vertexcom_wisun_firmware "${VERTEXCOM_WISUN_FIRMWARE_SRCS}" "")
+
+    # wisun firmware linker script preprocessing
+    add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/vertexcom_wisun_firmware.ld
+        COMMAND ${CMAKE_C_COMPILER}
+        -E -P ${VERTEXCOM_WISUN_DIR}/mcu/vc7300a/ARM/linker/vc7300a_main_vcrtos_psram.ld.S
+        -include ${VERTEXCOM_WISUN_DIR}/include/autoconf.h
+        -include ${VERTEXCOM_WISUN_DIR}/include/param.h
+        -I${VERTEXCOM_WISUN_DIR}
+        -o ${PROJECT_BINARY_DIR}/vertexcom_wisun_firmware.ld
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_firmware_linker ALL DEPENDS ${PROJECT_BINARY_DIR}/vertexcom_wisun_firmware.ld)
+    add_dependencies(vertexcom_wisun_firmware PLATFORM_LIBS vertexcom_wisun_firmware_linker)
+    target_link_libraries(vertexcom_wisun_firmware PLATFORM_LIBS)
+
+    if (UNIX AND NOT APPLE)
+        set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Linux/x86_64)
+    else()
+        set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Darwin)
+    endif()
+
+    # create compressed version of vertexcom_wisun_firmware.bin
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin.lzma
+        COMMAND ${ELZMA_PATH}/elzma -k -s 65536 -v -f ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin && mv ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin.lzma ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.tmp && touch ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.magic && printf "vtxc" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.magic && cat ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.magic ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.tmp > ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin.lzma && rm ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.magic ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.tmp
+        COMMENT "create compressed version of vertexcom_wisun_firmware.bin"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_firmware_compressed ALL DEPENDS
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin.lzma
+    )
+
+    # padding vertexcom_wisun_bootloader.bin to 16K
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_16K.bin
+        COMMAND ${VERTEXCOM_WISUN_DIR}/tools/scripts/padding_bootloader.sh ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader.bin ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_padding.bin && cat ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader.bin ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_padding.bin > ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_16K.bin && rm ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_padding.bin
+        COMMENT "padding vertexcom_wisun_bootloader.bin to 16KB"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_bootloader_16K ALL DEPENDS
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_16K.bin
+    )
+
+    # combine vertexcom_wisun_bootloader_16K.bin with vertexcom_wisun_firmware.bin
+
+    if (CONFIG_WISUN_ROOT)
+        set(WISUN_DEVICE_ROLE ROOT)
+    else()
+        set(WISUN_DEVICE_ROLE NODE)
+    endif()
+
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_${WISUN_DEVICE_ROLE}.bin
+        COMMAND cat ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_16K.bin ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin > ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_${WISUN_DEVICE_ROLE}.bin
+        COMMENT "combine bootloader and main image as vertexcom_wisun_${WISUN_DEVICE_ROLE}.bin"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_${WISUN_DEVICE_ROLE} ALL DEPENDS
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_16K.bin
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_${WISUN_DEVICE_ROLE}.bin
+    )
+
+    add_dependencies(vertexcom_wisun_${WISUN_DEVICE_ROLE} vertexcom_wisun_bootloader_16K vertexcom_wisun_firmware_compressed)
+
+    #TODO: build firmware upgrade image
+
+endif() #if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)

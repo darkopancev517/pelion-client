@@ -75,7 +75,7 @@
     #include "sxos_default.h"
 #elif defined(__RTX)
     #include "RTX_MW_default.h"
-#elif defined(__VERTEXCOM_AP_VC7300__)
+#elif defined(__VERTEXCOM_AP_VC7300__) || defined(__VERTEXCOM_WISUN_VC7300__)
     #include "Vertexcom/Vertexcom_default.h"
 #else
     #error "Please specify the platform PAL_PLATFORM_DEFINED_CONFIGURATION"
