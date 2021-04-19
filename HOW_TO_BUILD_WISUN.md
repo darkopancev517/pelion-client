@@ -2,6 +2,8 @@
 
 # MCU: VC7300 A3B5 (with pseudo SRAM)
 
+# TOOLCHAIN: gcc-arm-none-eabi-6-2017-q2-update
+
 ## Deploy WISUN sources files
 ```
 python pal-platform/pal-platform.py deploy --target=Vertexcom_WISUN_VC7300
