@@ -112,7 +112,7 @@ if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
 
     add_dependencies(mbedCloudClientExample vertexcom_wisun_firmware_linker)
 
-    if (APPLE)
+    if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
         set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Darwin)
     else()
         set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Linux/x86_64)
