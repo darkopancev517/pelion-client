@@ -156,6 +156,52 @@ if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
 
     add_dependencies(vertexcom_wisun_${WISUN_DEVICE_ROLE} vertexcom_wisun_bootloader_16K vertexcom_wisun_firmware_compressed)
 
-    #TODO: build firmware upgrade image
+    # WISUN firmware upgrade image --------------------------------------------
+
+    # build WISUN ota header tool
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_DIR}/tools/upgrade/crc16_ccitt
+        COMMAND gcc ${VERTEXCOM_WISUN_DIR}/tools/upgrade/crc16_ccitt.c -o ${VERTEXCOM_WISUN_DIR}/tools/upgrade/crc16_ccitt
+        COMMENT "build WISUN ota header tool"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_ota_header_tool ALL DEPENDS
+        ${VERTEXCOM_WISUN_DIR}/tools/upgrade/crc16_ccitt
+    )
+
+    # build WISUN ota config file
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config
+        COMMAND touch ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "ver=1" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "spread=1" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "auto_reboot=${CONFIG_OTA_AUTO_REBOOT}" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "mcu=${CONFIG_OTA_MCU_ID}" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "board=${CONFIG_OTA_BOARD_ID}" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "role=${CONFIG_OTA_RPL_ROLE}" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "auto_reboot_delay=${CONFIG_OTA_AUTO_REBOOT_DELAY}" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config && echo "coap_send_interval=${CONFIG_OTA_COAP_SEND_INTERVAL}" >> ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config
+        COMMENT "build WISUN ota config file"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_ota_config ALL DEPENDS
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config
+    )
+
+    # build WISUN ota image
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_${WISUN_DEVICE_ROLE}.bin
+        COMMAND ${VERTEXCOM_WISUN_DIR}/tools/upgrade/gen_ota_image.sh ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_config ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_firmware.bin.lzma && mv ${PROJECT_BINARY_DIR}/image_for_upgrade.bin ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_${WISUN_DEVICE_ROLE}.bin
+        COMMENT "build WISUN ota image"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_ota_image ALL DEPENDS
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_${WISUN_DEVICE_ROLE}.bin
+    )
+
+    add_dependencies(vertexcom_wisun_ota_image vertexcom_wisun_ota_config vertexcom_ota_header_tool vertexcom_wisun_${WISUN_DEVICE_ROLE})
+
+    # build WISUN PSRAM image
+    add_custom_command(OUTPUT ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_PSRAM_${WISUN_DEVICE_ROLE}.bin
+        COMMAND cat ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_bootloader_16K.bin ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_ota_${WISUN_DEVICE_ROLE}.bin > ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_PSRAM_${WISUN_DEVICE_ROLE}.bin
+        COMMENT "build WISUN PSRAM image"
+        VERBATIM
+    )
+    add_custom_target(vertexcom_wisun_PSRAM_image ALL DEPENDS
+        ${VERTEXCOM_WISUN_BIN_DIR}/vertexcom_wisun_PSRAM_${WISUN_DEVICE_ROLE}.bin
+    )
+
+    add_dependencies(vertexcom_wisun_PSRAM_image vertexcom_wisun_bootloader_16K vertexcom_wisun_ota_image)
+
+    # -------------------------------------------------------------------------
 
 endif() #if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)

@@ -229,11 +229,11 @@
         "to": "SDK/Vertexcom_WISUN_VC7300/vcrtos"
       },
       "wisun": {
-        "version": "1.0.1",
+        "version": "1.0.2",
         "from": {
           "protocol": "git",
           "location": "https://github.com/darkopancev517/wsn.git",
-          "tag": "wsn-1.0.1"
+          "tag": "wsn-1.0.2"
         },
         "to": "SDK/Vertexcom_WISUN_VC7300/wisun"
       },
