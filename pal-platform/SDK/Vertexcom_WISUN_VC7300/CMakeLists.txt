@@ -24,6 +24,10 @@ if (NOT CONFIG_BUILD_WITH_VCRTOS)
     message(FATAL_ERROR "CONFIG_BUILD_WITH_VCRTOS must be enabled!")
 endif()
 
+if (NOT CONFIG_MCU_vc7300a_X_PSRAM)
+    message(FATAL_ERROR "CONFIG_MCU_vc7300a_X_PSRAM must be enabled!")
+endif()
+
 set(PDMC_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(MBEDTLS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/library)
 set(PORTING_SRC_FOLDER ${PDMC_FOLDER}/source/platform/Vertexcom_WISUN_VC7300)
@@ -1008,6 +1012,7 @@ set(PLATFORM_LIBS_SRCS
 
 add_definitions(-DVCRTOS_PROJECT_CONFIG_FILE="vcrtos-project-config.h")
 add_definitions(-DVCRTOS_VERSION="${VCSOFTWARE_OS_VER}")
+
 add_library(vcrtos_core STATIC ${VCRTOS_CORE_SRCS})
 add_library(vcrtos_core_api STATIC ${VCRTOS_CORE_API_SRCS})
 add_library(wisun_main_porting_vcrtos STATIC ${WISUN_MAIN_PORTING_VCRTOS_SRCS})

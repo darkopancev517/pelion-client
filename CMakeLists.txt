@@ -58,8 +58,20 @@ CREATE_TEST_LIBRARY(mbedCloudClientExample "${MBED_CLOUD_CLIENT_EXAMPLE_SRC}" ""
 target_link_libraries(mbedCloudClientExample mbedCloudClient platformCommon mbedClientSharedObjects)
 
 if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
-    set(VERTEXCOM_WISUN_BOOTLOADER_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/dummies/dummy_bootloader.c)
-    set(VERTEXCOM_WISUN_FIRMWARE_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/dummies/dummy_firmware.c)
+
+    if (NOT CONFIG_BUILD_WITH_VCRTOS)
+        message(FATAL_ERROR "CONFIG_BUILD_WITH_VCRTOS must be enabled!")
+    endif()
+
+    if (NOT CONFIG_MCU_vc7300a_X_PSRAM)
+        message(FATAL_ERROR "CONFIG_MCU_vc7300a_X_PSRAM must be enabled!")
+    endif()
+
+    include(${CMAKE_CURRENT_SOURCE_DIR}/WISUN-flags.cmake)
+
+    set(VERTEXCOM_WISUN_BOOTLOADER_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/dummy_bootloader.c)
+    set(VERTEXCOM_WISUN_FIRMWARE_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/wisun_main.c)
+
     set(VERTEXCOM_WISUN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pal-platform/SDK/Vertexcom_WISUN_VC7300/wisun)
     set(VERTEXCOM_WISUN_BIN_DIR ${PROJECT_BINARY_DIR}/../${CMAKE_BUILD_TYPE})
 
@@ -82,6 +94,7 @@ if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
     target_link_libraries(vertexcom_wisun_bootloader PLATFORM_BOOTLOADER_LIBS)
 
     CREATE_TEST_LIBRARY(vertexcom_wisun_firmware "${VERTEXCOM_WISUN_FIRMWARE_SRCS}" "")
+    set_target_properties(vertexcom_wisun_firmware PROPERTIES COMPILE_FLAGS ${WISUN_MAIN_CFLAGS})
 
     # wisun firmware linker script preprocessing
     add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/vertexcom_wisun_firmware.ld

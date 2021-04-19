@@ -1,0 +1,185 @@
+cmake_minimum_required (VERSION 3.5)
+SET(CMAKE_SYSTEM_NAME Generic)
+
+set(WISUN_PAL_PLATFORM_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pal-platform/SDK/${OS_BRAND}/wisun)
+
+set(WISUN_COMMON_CFLAGS "-include ${WISUN_PAL_PLATFORM_DIR}/include/autoconf.h")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -include ${WISUN_PAL_PLATFORM_DIR}/include/param.h")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -Wall -Werror -Wno-pragmas -Wno-format -Wno-pointer-sign -Wno-switch")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -std=gnu99 -fno-delete-null-pointer-checks -fno-peephole2")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -fno-strict-aliasing -fshort-enums -fno-builtin-printf")
+
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/board/common")
+
+if (CONFIG_BOARD_vc7300BMTR)
+set(WISUN_BOARD vc7300BMTR)
+endif()
+
+if (CONFIG_RADIO_centauriB3)
+set(WISUN_RADIO centauriB3)
+endif()
+
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/board/${WISUN_BOARD}")
+
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/mcu/common")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/mcu/vc7300a")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/mcu/vc7300a/periph")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/mcu/vc7300a/hal")
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/mcu/vc7300a/ARM/cmsis")
+
+if (CONFIG_WISUN_ROOT)
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -DWISUN_ROOT=1")
+else()
+set(WISUN_COMMON_CFLAGS "${WISUN_COMMON_CFLAGS} -DWISUN_NODE=1")
+endif()
+
+set(WISUN_MAIN_CFLAGS "${WISUN_COMMON_CFLAGS}")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DMCU_USE_VC7300A")
+if (CONFIG_BOARD_vc7300BMTR)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DBOARD_USE_VC7300BMTR")
+endif()
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DRADIO_USE_CENTAURIB3")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DPLC_USE_UNKNOWN")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DSYSTEM_USE_CONTIKI")
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DSW_VERSION=0xdeadbeef")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DSW_DATE=0xdeadbeef")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DSW_TIME=0xdeadbeef")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DSW_BRANCH=master")
+
+if (CONFIG_RADIO_centauriB3)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/radio/centauriB3")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/radio/centauriB3/firmware")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/radio/centauriB3/firmware/phy")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCSR_ACCESS=")
+endif()
+
+if (CONFIG_BUILD_APP_vcapps)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/apps/vcapps")
+endif()
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/common")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/common/shell/commands")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/config")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/driver")
+
+if (CONFIG_RADIO_centauriB3)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/driver/centauriB3")
+endif()
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/main")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/misc")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/sys")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/dev")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/lib")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/llsec")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/mac")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/rime")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/rpl")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/loader")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI=1")
+
+if (CONFIG_BOARD_vc7300BMTR)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI_TARGET_vc7300BMTR=1")
+endif()
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DAUTOSTART_ENABLE")
+
+# core/net/wisun
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DNETSTACK_CONF_WITH_WISUN=1")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/wisun")
+
+# security/wolfssl
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DWOLFSSL_USER_SETTINGS")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/contiki/security/wolfssl-3.13.0/IDE/GCC-ARM/Header")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/security/wolfssl-3.13.0")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -Wno-cpp -Wno-unused-variable -Wno-format")
+
+if (CONFIG_CONTIKI_WITH_IPV6)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DNETSTACK_CONF_WITH_IPV6=1")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DUIP_CONF_IPV6_RPL=1")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/ipv6/multicast")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/ipv6")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/core/net/ip")
+endif()
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI_CONF_WITH_VCAPP=1")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI_CONF_WITH_SHELL=1")
+
+# system util apps
+
+# config tool
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/config_tool")
+
+# shell
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/shell")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/shell/core")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/shell/commands")
+
+# vc_forwarder
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_forwarder")
+
+# vc_QgdwUart
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_QgdwUart")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_qgdw")
+
+# vc_sysResAL
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_sysResAL")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_sysResAL/vc_sysResAL_evHandler")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_sysResAL/vc_sysResAL_shell")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_sysResAL/vc_sysResAL_shell/res/shellCmd")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_sysResAL")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_sysResAL/vc_sysResAL_evHandler")
+
+# vc_timerUart
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vc_timerUart")
+
+# vertexcom_coap
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vertexcom_coap")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vertexcom_coap")
+
+# vertexcom_dlms
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vertexcom_dlms")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vertexcom_dlms")
+
+# vertexcom_qgdw_1376_2
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vertexcom_qgdw_1376_2")
+
+# vertexcom_slip
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/vertexcom_slip")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vertexcom_slip")
+
+# telnetd
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/telnetd")
+
+# unit_test_framework
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/unit_test_framework")
+
+# common vcapps related include directories
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/coap_resource")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/system/contiki/utils/coap_resource/res")
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_sysResAL")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_timerUart")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vertexcom_slip")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vertexcom_dlms")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_qgdw")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_sysResAL/vc_sysResAL_evHandler")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vc_pktHandler")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -I${WISUN_PAL_PLATFORM_DIR}/include/middleware/vc_lib/vertexcom_coap")
+
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DPROJECT_CONF_H='\"vc_projectConf.h\"'")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DUSE_CONFIG_TOOL")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI_WITH_VMEM=1")
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI_WITH_VC_APP_REFAPP=1")
+
+if (CONFIG_CONTIKI_WITH_COAP)
+set(WISUN_MAIN_CFLAGS "${WISUN_MAIN_CFLAGS} -DCONTIKI_CONF_WITH_VC_APP_COAPHANDLER=1")
+endif()
