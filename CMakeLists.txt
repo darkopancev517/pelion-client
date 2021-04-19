@@ -110,10 +110,12 @@ if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
     add_dependencies(vertexcom_wisun_firmware PLATFORM_LIBS vertexcom_wisun_firmware_linker)
     target_link_libraries(vertexcom_wisun_firmware PLATFORM_LIBS)
 
-    if (UNIX AND NOT APPLE)
-        set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Linux/x86_64)
-    else()
+    add_dependencies(mbedCloudClientExample vertexcom_wisun_firmware_linker)
+
+    if (APPLE)
         set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Darwin)
+    else()
+        set(ELZMA_PATH ${VERTEXCOM_WISUN_DIR}/tools/easylzma/Linux/x86_64)
     endif()
 
     # create compressed version of vertexcom_wisun_firmware.bin
