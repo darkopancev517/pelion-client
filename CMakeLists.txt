@@ -69,8 +69,12 @@ if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
 
     include(${CMAKE_CURRENT_SOURCE_DIR}/WISUN-flags.cmake)
 
-    set(VERTEXCOM_WISUN_BOOTLOADER_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/dummy_bootloader.c)
-    set(VERTEXCOM_WISUN_FIRMWARE_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/wisun_main.c)
+    set(VERTEXCOM_WISUN_BOOTLOADER_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/dummy/bootloader.c)
+
+    FILE(GLOB VERTEXCOM_WISUN_FIRMWARE_SRCS
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/source/platform/Vertexcom_WISUN_VC7300/wisun/*.cpp"
+    )
 
     set(VERTEXCOM_WISUN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/pal-platform/SDK/Vertexcom_WISUN_VC7300/wisun)
     set(VERTEXCOM_WISUN_BIN_DIR ${PROJECT_BINARY_DIR}/../${CMAKE_BUILD_TYPE})
