@@ -104,7 +104,7 @@ extern void vcsystem_init(void);
 #if (CONFIG_DEBUG_MAIN_LOOP_STALL==1)
 int m_main_loop_cnt=0;
 #endif
-int main (void)
+int wisun_main_system_init(void)
 {
     board_init();
 #if CONFIG_WISUN_DUAL_MODE
