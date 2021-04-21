@@ -111,7 +111,7 @@ if (MBED_CLOUD_CLIENT_SDK MATCHES Vertexcom_WISUN_VC7300)
         VERBATIM
     )
     add_custom_target(vertexcom_wisun_firmware_linker ALL DEPENDS ${PROJECT_BINARY_DIR}/vertexcom_wisun_firmware.ld)
-    add_dependencies(vertexcom_wisun_firmware PLATFORM_LIBS vertexcom_wisun_firmware_linker)
+    add_dependencies(vertexcom_wisun_firmware mbedCloudClient platformCommon mbedClientSharedObjects vertexcom_wisun_firmware_linker)
     target_link_libraries(vertexcom_wisun_firmware PLATFORM_LIBS)
 
     add_dependencies(mbedCloudClientExample vertexcom_wisun_firmware_linker)
