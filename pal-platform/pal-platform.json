@@ -220,20 +220,20 @@
     },
     "middleware": {
       "vcrtos": {
-        "version": "1.2.2",
+        "version": "2.0.0",
         "from": {
           "protocol": "git",
           "location": "https://github.com/darkopancev517/vcrtos.git",
-          "tag": "vcrtos-1.2.2"
+          "tag": "vcrtos-2.0.0"
         },
         "to": "SDK/Vertexcom_WISUN_VC7300/vcrtos"
       },
       "wisun": {
-        "version": "1.0.2",
+        "version": "1.0.3",
         "from": {
           "protocol": "git",
           "location": "https://github.com/darkopancev517/wsn.git",
-          "tag": "wsn-1.0.2"
+          "tag": "wsn-1.0.3"
         },
         "to": "SDK/Vertexcom_WISUN_VC7300/wisun"
       },
