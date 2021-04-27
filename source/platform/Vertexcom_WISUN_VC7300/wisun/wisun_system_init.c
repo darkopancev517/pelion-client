@@ -208,7 +208,7 @@ int wisun_main_system_init(void)
                 extern void vcradio_alive_check(void);
                 vcradio_alive_check();
             #ifdef CONFIG_BUILD_WITH_VCRTOS
-            thread_sleep(process_instance);
+            thread_sleep();
             #endif
 #ifdef CONFIG_BUILD_WITH_VCRTOS
         } while (1);

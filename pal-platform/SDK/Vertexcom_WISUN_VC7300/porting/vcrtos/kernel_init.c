@@ -21,22 +21,20 @@
 #include <vcrtos/config.h>
 #include <vcrtos/assert.h>
 #include <vcrtos/cpu.h>
-#include <vcrtos/instance.h>
 #include <vcrtos/thread.h>
 #include <vcrtos/mutex.h>
 
 extern int main(void);
 
+kernel_pid_t main_thread_pid = KERNEL_PID_UNDEF;
+kernel_pid_t idle_thread_pid = KERNEL_PID_UNDEF;
+
 void *thread_main_handler(void *arg)
 {
     (void) arg;
-
     main();
-
     /* should not reach here */
-
     vcassert(0);
-
     return NULL;
 }
 
@@ -47,7 +45,6 @@ extern mutex_t pollhandler_mutex;
 void *thread_idle_handler(void *arg)
 {
     (void) arg;
-
     while (1)
     {
         process_paused_continue();
@@ -57,7 +54,6 @@ void *thread_idle_handler(void *arg)
         }
         cpu_sleep(0);
     }
-
     return NULL;
 }
 
@@ -68,19 +64,19 @@ void kernel_init(void)
 {
     (void) cpu_irq_disable();
 
-    instance_t *instance = instance_init_single();
+    thread_scheduler_init();
 
-    vcassert(instance_is_initialized(instance));
+    vcassert(thread_scheduler_is_initialized());
 
-    (void) thread_create((void *)instance, _main_stack, sizeof(_main_stack),
-                         KERNEL_THREAD_PRIORITY_MAIN,
-                         THREAD_FLAGS_CREATE_WOUT_YIELD | THREAD_FLAGS_CREATE_STACKMARKER,
-                         thread_main_handler, (void *)instance, "main");
+    main_thread_pid = thread_create(_main_stack, sizeof(_main_stack), thread_main_handler, "main",
+                                    KERNEL_THREAD_PRIORITY_MAIN,
+                                    NULL, 
+                                    THREAD_FLAGS_CREATE_WOUT_YIELD | THREAD_FLAGS_CREATE_STACKMARKER);
 
-    (void) thread_create((void *)instance, _idle_stack, sizeof(_idle_stack),
-                         KERNEL_THREAD_PRIORITY_IDLE,
-                         THREAD_FLAGS_CREATE_WOUT_YIELD | THREAD_FLAGS_CREATE_STACKMARKER,
-                         thread_idle_handler, (void *)instance, "idle");
+    idle_thread_pid = thread_create(_idle_stack, sizeof(_idle_stack), thread_idle_handler, "idle",
+                                    KERNEL_THREAD_PRIORITY_IDLE,
+                                    NULL,
+                                    THREAD_FLAGS_CREATE_WOUT_YIELD | THREAD_FLAGS_CREATE_STACKMARKER);
 
     cpu_switch_context_exit();
 }

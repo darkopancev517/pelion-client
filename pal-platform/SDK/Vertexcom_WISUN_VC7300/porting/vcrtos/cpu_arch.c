@@ -48,6 +48,7 @@ int cpu_is_in_isr(void)
 void cpu_trigger_pendsv_interrupt(void)
 {
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+    __ISB();
 }
 
 __attribute__((naked)) void cpu_switch_context_exit(void)
@@ -92,7 +93,6 @@ void cpu_sleep(int deep)
     {
         SCB->SCR &= ~(SCB_SCR_SLEEPDEEP_Msk);
     }
-
     unsigned state = cpu_irq_disable();
     __DSB();
     __WFI();
@@ -102,15 +102,10 @@ void cpu_sleep(int deep)
 void cpu_jump_to_image(uint32_t image_addr)
 {
     __disable_irq();
-
     __set_MSP(*(uint32_t *)image_addr);
-
     image_addr += 4; /* skip stack pointer */
-
     uint32_t destination_addr = *(uint32_t *)image_addr;
-
     destination_addr |= 0x1; /* make sure thumb state bit is set */
-
     __asm("BX %0" ::"r"(destination_addr)); /* branch execution */
 }
 

@@ -883,7 +883,6 @@ set(WISUN_MAIN_APPS_SRCS
 endif()
 
 set(VCRTOS_CORE_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/instance.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/msg.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/mutex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/thread.cpp
@@ -892,10 +891,8 @@ set(VCRTOS_CORE_SRCS
 )
 
 set(VCRTOS_CORE_API_SRCS
-    ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/api/instance_api.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/api/msg_api.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/api/mutex_api.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/api/mutex_timeout_api.c
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/api/thread_api.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vcrtos/source/core/api/event_api.cpp
 )

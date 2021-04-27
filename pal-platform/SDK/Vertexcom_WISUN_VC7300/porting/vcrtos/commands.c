@@ -20,13 +20,12 @@
 
 #include <vcrtos/config.h>
 #include <vcrtos/cli.h>
-#include <vcrtos/instance.h>
 #include <vcrtos/kernel.h>
 #include <vcrtos/thread.h>
 
 #include "cortexm.h"
 
-void vcrtos_ps(void *instance)
+void vcrtos_ps()
 {
     const char queued_name[] = {'_', 'Q'};
     int overall_stacksz = 0, overall_used = 0;
@@ -60,7 +59,7 @@ void vcrtos_ps(void *instance)
 
     for (i = KERNEL_PID_FIRST; i <= KERNEL_PID_LAST; i++)
     {
-        thread_t *p = thread_get_from_scheduler(instance, i);
+        thread_t *p = thread_get_from_scheduler(i);
 
         if (p != NULL)
         {
@@ -73,7 +72,7 @@ void vcrtos_ps(void *instance)
             stacksz -= thread_measure_stack_free(p->stack_start);
             overall_used += stacksz;
 
-            unsigned switches = thread_get_schedules_stat(instance, i);
+            unsigned switches = thread_get_schedules_stat(i);
 
             printf("\t%3" PRIkernel_pid " | %-20s"
                    " | %-8s %.1s | %3i"

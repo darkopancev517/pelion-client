@@ -297,11 +297,7 @@ void vcsystem_init(void)
 {
     node_id_restore(); // restore default node if and mac from HW NVRAM
 
-#ifdef CONFIG_BUILD_WITH_VCRTOS
-    process_init(instance_get());
-#else
     process_init();
-#endif
 
     extern void shell_init(void);
     shell_init();
