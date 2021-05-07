@@ -4,6 +4,10 @@
 #include "contiki-net.h"
 #include "contiki-lib.h"
 
+#include "pal.h"
+#include "pal_plat_rtos.h"
+#include <stdlib.h>
+
 // Needed for PRIu64 on FreeRTOS
 #include <stdio.h>
 // Note: this macro is needed on armcc to get the the limit macros like UINT16_MAX
@@ -148,10 +152,29 @@ void main_arm_pelion_application(void)
 }
 #endif
 
+palMutexID_t mutex1 = NULLPTR;
+//palMutexID_t mutex2 = NULLPTR;
+//palSemaphoreID_t semaphore1 = NULLPTR;
 
 int main(void)
 {
     wisun_main_system_init();
+
+    palStatus_t status = PAL_SUCCESS;
+
+    status = pal_osMutexCreate(&mutex1);
+
+    if (status != PAL_SUCCESS || mutex1 == NULLPTR)
+    {
+        printf("mutex create failed\n");
+    }
+
+    status = pal_osMutexDelete(&mutex1);
+
+    if (status != PAL_SUCCESS || mutex1 != NULLPTR)
+    {
+        printf("mutex delete failed\n");
+    }
 
     //main_arm_pelion_application();
 
