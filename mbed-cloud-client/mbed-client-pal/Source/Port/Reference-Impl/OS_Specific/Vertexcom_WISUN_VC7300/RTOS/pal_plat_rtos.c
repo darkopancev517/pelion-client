@@ -111,30 +111,6 @@ palStatus_t pal_plat_RTOSDestroy(void)
     return status;
 }
 
-palStatus_t pal_plat_osDelay(uint32_t milliseconds)
-{
-    // TODO
-    return PAL_SUCCESS;
-}
-
-uint64_t pal_plat_osKernelSysTick()
-{
-    // TODO
-    return 0;
-}
-
-uint64_t pal_plat_osKernelSysTickMicroSec(uint64_t microseconds)
-{
-    // TODO
-    return 0;
-}
-
-uint64_t pal_plat_osKernelSysTickFrequency()
-{
-    // TODO
-    return 0;
-}
-
 palStatus_t pal_plat_osThreadCreate(palThreadFuncPtr function, void* funcArgument, palThreadPriority_t priority, uint32_t stackSize, palThreadID_t* threadID)
 {
     palStatus_t status = PAL_SUCCESS;
@@ -219,30 +195,6 @@ palStatus_t pal_plat_osThreadTerminate(palThreadID_t* threadID)
         PAL_THREADS_MUTEX_UNLOCK(status);
     }
 end:
-    return status;
-}
-
-palStatus_t pal_plat_osTimerCreate(palTimerFuncPtr function, void* funcArgument, palTimerType_t timerType, palTimerID_t* timerID)
-{
-    palStatus_t status = PAL_SUCCESS;
-    return status;
-}
-
-palStatus_t pal_plat_osTimerStart(palTimerID_t timerID, uint32_t millisec)
-{
-    palStatus_t status = PAL_SUCCESS;
-    return status;
-}
-
-palStatus_t pal_plat_osTimerStop(palTimerID_t timerID)
-{
-    palStatus_t status = PAL_SUCCESS;
-    return status;
-}
-
-palStatus_t pal_plat_osTimerDelete(palTimerID_t* timerID)
-{
-    palStatus_t status = PAL_ERR_RTOS_PARAMETER;
     return status;
 }
 
@@ -419,22 +371,6 @@ palStatus_t pal_plat_osSemaphoreDelete(palSemaphoreID_t* semaphoreID)
         status = PAL_ERR_GENERIC_FAILURE;
     }
 
-    return status;
-}
-
-void *pal_plat_malloc(size_t len)
-{
-    return NULL;
-}
-
-void pal_plat_free(void *buffer)
-{
-    (void)buffer;
-}
-
-palStatus_t pal_plat_osRandomBuffer(uint8_t *randomBuf, size_t bufSizeBytes, size_t* actualRandomSizeBytes)
-{
-    palStatus_t status = PAL_SUCCESS;
     return status;
 }
 

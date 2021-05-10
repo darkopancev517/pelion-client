@@ -905,6 +905,11 @@ set(WISUN_MAIN_PORTING_VCRTOS_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/porting/vcrtos/assert_failure.c
 )
 
+set(WISUN_MAIN_PORTING_PELION_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/porting/pelion/pal_plat_rtos_timer.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/porting/pelion/pal_plat_rtos_misc.c
+)
+
 set(WISUN_MAIN_PORTING_WISUN_INIT_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/porting/wisun/wisun_init.c
 )
@@ -1014,6 +1019,11 @@ add_library(vcrtos_core STATIC ${VCRTOS_CORE_SRCS})
 add_library(vcrtos_core_api STATIC ${VCRTOS_CORE_API_SRCS})
 add_library(wisun_main_porting_vcrtos STATIC ${WISUN_MAIN_PORTING_VCRTOS_SRCS})
 set_target_properties(wisun_main_porting_vcrtos PROPERTIES COMPILE_FLAGS ${WISUN_COMMON_CFLAGS})
+
+# PELION porting libraries ----------------------------------------------------
+
+add_library(wisun_main_porting_pelion STATIC ${WISUN_MAIN_PORTING_PELION_SRCS})
+set_target_properties(wisun_main_porting_pelion PROPERTIES COMPILE_FLAGS ${WISUN_MAIN_CFLAGS})
 
 # WISUN libraries -------------------------------------------------------------
 
@@ -1175,6 +1185,7 @@ set(PLATFORM_LIBS_list
     wisun_main_apps
     wisun_main_porting_vcrtos
     wisun_main_porting_wisun_init
+    wisun_main_porting_pelion
     vcrtos_core
     vcrtos_core_api
 )
