@@ -68,7 +68,7 @@ PAL_PRIVATE palThreadData_t** threadFind(const thread_t *thread);
 PAL_PRIVATE PAL_INLINE palThreadData_t** threadAllocate(void);
 PAL_PRIVATE void *osMutexCreate(void);
 PAL_PRIVATE void osMutexDestroy(uintptr_t mutexID);
-PAL_PRIVATE uintptr_t osSemaphoreCreate(unsigned int value);
+PAL_PRIVATE void *osSemaphoreCreate(unsigned int value);
 PAL_PRIVATE PAL_INLINE uint32_t pal_plat_GetIPSR(void);
 PAL_PRIVATE void *threadFunction(void *arg);
 
@@ -339,7 +339,7 @@ palStatus_t pal_plat_osSemaphoreCreate(uint32_t count, palSemaphoreID_t* semapho
 
     if (status == PAL_SUCCESS)
     {
-        semaphore->semaphoreID = osSemaphoreCreate(count);
+        semaphore->semaphoreID = (uintptr_t)osSemaphoreCreate(count);
         semaphore->maxCount = PAL_SEMAPHORE_MAX_COUNT;
         if (semaphore->semaphoreID == NULLPTR)
         {
@@ -375,7 +375,7 @@ palStatus_t pal_plat_osSemaphoreRelease(palSemaphoreID_t semaphoreID)
         return PAL_ERR_INVALID_ARGUMENT;
     }
 
-    semaphore = (palSemaphore_t*)semaphoreID;
+    semaphore = (palSemaphore_t *)semaphoreID;
 
     tmpCounters = ((sema_t *)(semaphore->semaphoreID))->value;
 
@@ -504,7 +504,7 @@ PAL_PRIVATE void osMutexDestroy(uintptr_t mutexID)
     free(mutex);
 }
 
-PAL_PRIVATE uintptr_t osSemaphoreCreate(unsigned int value)
+PAL_PRIVATE void *osSemaphoreCreate(unsigned int value)
 {
     sema_t *sema = (sema_t *)malloc(sizeof(sema_t));
     if (sema == NULL)
@@ -512,7 +512,7 @@ PAL_PRIVATE uintptr_t osSemaphoreCreate(unsigned int value)
         return NULLPTR;
     }
     sema_create(sema, value);
-    return (uintptr_t)sema;
+    return (void *)sema;
 }
 
 PAL_PRIVATE PAL_INLINE uint32_t pal_plat_GetIPSR(void)
