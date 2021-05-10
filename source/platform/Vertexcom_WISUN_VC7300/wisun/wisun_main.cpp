@@ -152,9 +152,7 @@ void main_arm_pelion_application(void)
 }
 #endif
 
-palMutexID_t mutex1 = NULLPTR;
-//palMutexID_t mutex2 = NULLPTR;
-//palSemaphoreID_t semaphore1 = NULLPTR;
+palMutexID_t testMutex1 = NULLPTR;
 
 int main(void)
 {
@@ -162,19 +160,18 @@ int main(void)
 
     palStatus_t status = PAL_SUCCESS;
 
-    status = pal_osMutexCreate(&mutex1);
+    status = pal_osMutexCreate(&testMutex1);
 
-    if (status != PAL_SUCCESS || mutex1 == NULLPTR)
+    if (status == PAL_SUCCESS || testMutex1 != NULLPTR)
+    {
+        printf("mutex create succeed\n");
+    }
+    else
     {
         printf("mutex create failed\n");
     }
 
-    status = pal_osMutexDelete(&mutex1);
-
-    if (status != PAL_SUCCESS || mutex1 != NULLPTR)
-    {
-        printf("mutex delete failed\n");
-    }
+    //status = pal_osMutexDelete(&mutex1);
 
     //main_arm_pelion_application();
 
