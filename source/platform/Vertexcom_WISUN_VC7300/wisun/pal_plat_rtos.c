@@ -66,7 +66,7 @@ PAL_PRIVATE palThreadData_t *g_threadsArray[PAL_MAX_CONCURRENT_THREADS] = { 0 };
 PAL_PRIVATE void threadFree(palThreadData_t** threadData);
 PAL_PRIVATE palThreadData_t** threadFind(const thread_t *thread);
 PAL_PRIVATE PAL_INLINE palThreadData_t** threadAllocate(void);
-PAL_PRIVATE uintptr_t osMutexCreate(void);
+PAL_PRIVATE void *osMutexCreate(void);
 PAL_PRIVATE void osMutexDestroy(uintptr_t mutexID);
 PAL_PRIVATE uintptr_t osSemaphoreCreate(unsigned int value);
 PAL_PRIVATE PAL_INLINE uint32_t pal_plat_GetIPSR(void);
@@ -261,7 +261,7 @@ palStatus_t pal_plat_osMutexCreate(palMutexID_t* mutexID)
     }
     if (PAL_SUCCESS == status)
     {
-        mutex->mutexID = osMutexCreate();
+        mutex->mutexID = (uintptr_t)osMutexCreate();
         if (mutex->mutexID == NULLPTR)
         {
             free(mutex);
@@ -485,7 +485,7 @@ PAL_PRIVATE PAL_INLINE palThreadData_t** threadAllocate(void)
     return threadData;
 }
 
-PAL_PRIVATE uintptr_t osMutexCreate(void)
+PAL_PRIVATE void *osMutexCreate(void)
 {
     mutex_t *mutex = (mutex_t*)malloc(sizeof(mutex_t));
     if (mutex == NULL)
@@ -493,7 +493,7 @@ PAL_PRIVATE uintptr_t osMutexCreate(void)
         return NULLPTR;
     }
     mutex_init(mutex);
-    return (uintptr_t)mutex;
+    return (void *)mutex;
 }
 
 PAL_PRIVATE void osMutexDestroy(uintptr_t mutexID)
