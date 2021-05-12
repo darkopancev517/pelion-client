@@ -153,6 +153,12 @@ void main_arm_pelion_application(void)
 #endif
 
 palMutexID_t testMutex1 = NULLPTR;
+palTimerID_t testTimer1 = NULLPTR;
+
+void palTimerTestCallback(void const *arg)
+{
+    printf("pal test timer callback\n");
+}
 
 int main(void)
 {
@@ -162,13 +168,35 @@ int main(void)
 
     status = pal_osMutexCreate(&testMutex1);
 
-    if (status == PAL_SUCCESS || testMutex1 != NULLPTR)
+    if (status == PAL_SUCCESS && testMutex1 != NULLPTR)
     {
         printf("mutex create succeed\n");
     }
     else
     {
         printf("mutex create failed\n");
+    }
+
+    status = pal_osTimerCreate(palTimerTestCallback, NULL, palOsTimerOnce, &testTimer1);
+
+    if (status == PAL_SUCCESS && testTimer1 != NULLPTR)
+    {
+        printf("timer1 create succeed\n");
+    }
+    else
+    {
+        printf("timer1 create failed\n");
+    }
+
+    status = pal_osTimerStart(testTimer1, 1000);
+
+    if (status == PAL_SUCCESS)
+    {
+        printf("timer1 start succeed\n");
+    }
+    else
+    {
+        printf("timer1 start failed\n");
     }
 
     //status = pal_osMutexDelete(&mutex1);
