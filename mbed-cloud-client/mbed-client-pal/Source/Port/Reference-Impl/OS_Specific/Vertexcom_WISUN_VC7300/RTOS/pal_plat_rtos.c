@@ -6,6 +6,7 @@
 #include <vcrtos/mutex.h>
 #include <vcrtos/cpu.h>
 #include <vcrtos/sema.h>
+#include <vcrtos/list.h>
 
 #define TRACE_GROUP "PAL"
 
@@ -28,6 +29,13 @@ typedef struct palThreadData
     palThreadFuncPtr userFunction;
     void *userFunctionArgument;
 } palThreadData_t;
+
+typedef struct
+{
+    mutex_t *mutex;
+    thread_t *thread;
+    volatile uint8_t dequeued;
+} mutex_thread_t;
 
 #define PAL_MAX_CONCURRENT_THREADS 8
 
@@ -192,10 +200,10 @@ palStatus_t pal_plat_osMutexCreate(palMutexID_t* mutexID)
 {
     palStatus_t status = PAL_SUCCESS;
     palMutex_t *mutex = NULL;
+
     if (mutexID == NULL)
-    {
         return PAL_ERR_INVALID_ARGUMENT;
-    }
+
     mutex = (palMutex_t*)malloc(sizeof(palMutex_t));
     if (NULL == mutex)
     {
@@ -216,9 +224,121 @@ palStatus_t pal_plat_osMutexCreate(palMutexID_t* mutexID)
     return status;
 }
 
+PAL_PRIVATE list_node_t *_list_remove(list_node_t *list, list_node_t *node)
+{
+    while (list->next)
+    {
+        if (list->next == node)
+        {
+            list->next = node->next;
+            return node;
+        }
+        list = list->next;
+    }
+    return list->next;
+}
+
+PAL_PRIVATE void _mutex_remove_thread_from_queue(mutex_t *mutex, thread_t *thread, volatile uint8_t *dequeued)
+{
+    unsigned irqmask = cpu_irq_disable();
+
+    if (mutex == NULL || thread == NULL)
+        return;
+
+    if (mutex->queue.next != MUTEX_LOCKED && mutex->queue.next != NULL)
+    {
+        list_node_t *node = _list_remove(&mutex->queue, (list_node_t *)&thread->runqueue_entry);
+
+        if (node != NULL)
+        {
+            if (mutex->queue.next == NULL)
+            {
+                mutex->queue.next = MUTEX_LOCKED;
+            }
+            *dequeued = 1;
+            thread_scheduler_set_status(thread, THREAD_STATUS_PENDING);
+            cpu_irq_restore(irqmask);
+            thread_scheduler_switch(thread->priority);
+            return;
+        }
+    }
+    *dequeued = 0;
+    cpu_irq_restore(irqmask);
+}
+
+PAL_PRIVATE void _mutex_timeout(const void *arg)
+{
+    unsigned int irqmask = cpu_irq_disable();
+    mutex_thread_t *mt = (mutex_thread_t *)arg;
+    _mutex_remove_thread_from_queue(mt->mutex, mt->thread, &mt->dequeued);
+    cpu_irq_restore(irqmask);
+}
+
+palStatus_t pal_plat_osMutexLockTimeout(palMutexID_t mutexID, uint32_t timeout)
+{
+    palStatus_t status = PAL_SUCCESS;
+    mutex_t *mutex = NULL;
+
+    if (mutexID == NULLPTR)
+        return PAL_ERR_INVALID_ARGUMENT;
+
+    mutex = (mutex_t *)((palMutex_t *)mutexID)->mutexID;
+
+    thread_t *curr = thread_current();
+
+    mutex_thread_t mt = { mutex, curr, .dequeued=0 };
+
+    if (timeout != 0)
+    {
+        palTimerID_t mutex_timer;
+        status = pal_osTimerCreate(_mutex_timeout, (void *)&mt, palOsTimerOnce, &mutex_timer);
+        if (status == PAL_SUCCESS)
+        {
+            status = pal_osTimerStart(mutex_timer, timeout);
+            if (status == PAL_SUCCESS)
+            {
+                mutex_lock(mutex);
+                pal_osTimerDelete(&mutex_timer);
+                if (mt.dequeued)
+                {
+                    // mutex was not available within timeout and dequeued
+                    // from the list
+                    status = PAL_ERR_TIMEOUT_EXPIRED;
+                }
+            }
+            else
+            {
+                PAL_LOG_ERR("Rtos mutex timer start failed");
+            }
+        }
+        else
+        {
+            PAL_LOG_ERR("Rtos mutex timer create failed");
+        }
+    }
+
+    return status;
+}
+
 palStatus_t pal_plat_osMutexWait(palMutexID_t mutexID, uint32_t millisec)
 {
     palStatus_t status = PAL_SUCCESS;
+    palMutex_t *mutex = NULL;
+
+    if (mutexID == NULLPTR)
+        return PAL_ERR_INVALID_ARGUMENT;
+
+    mutex = (palMutex_t *)mutexID;
+
+    if (millisec == PAL_RTOS_WAIT_FOREVER)
+    {
+        mutex_lock((mutex_t *)mutex->mutexID);
+    }
+    else
+    {
+        status = pal_plat_osMutexLockTimeout(mutexID, millisec);
+    }
+
     return status;
 }
 
@@ -228,9 +348,8 @@ palStatus_t pal_plat_osMutexRelease(palMutexID_t mutexID)
     palMutex_t *mutex = NULL;
 
     if (mutexID == NULLPTR)
-    {
         return PAL_ERR_INVALID_ARGUMENT;
-    }
+
     mutex = (palMutex_t *)mutexID;
     mutex_unlock((mutex_t *)mutex->mutexID);
     return status;
@@ -242,9 +361,7 @@ palStatus_t pal_plat_osMutexDelete(palMutexID_t* mutexID)
     palMutex_t *mutex = NULL;
 
     if (mutexID == NULL || *mutexID == NULLPTR)
-    {
         return PAL_ERR_INVALID_ARGUMENT;
-    }
 
     mutex = (palMutex_t *)*mutexID;
     if (mutex->mutexID != NULLPTR)
@@ -269,15 +386,12 @@ palStatus_t pal_plat_osSemaphoreCreate(uint32_t count, palSemaphoreID_t* semapho
     palSemaphore_t *semaphore = NULL;
 
     if (NULL == semaphoreID)
-    {
         return PAL_ERR_INVALID_ARGUMENT;
-    }
 
     semaphore = (palSemaphore_t *)malloc(sizeof(palSemaphore_t));
+
     if (semaphore == NULL)
-    {
         status = PAL_ERR_NO_MEMORY;
-    }
 
     if (status == PAL_SUCCESS)
     {
@@ -301,7 +415,76 @@ palStatus_t pal_plat_osSemaphoreCreate(uint32_t count, palSemaphoreID_t* semapho
 palStatus_t pal_plat_osSemaphoreWait(palSemaphoreID_t semaphoreID, uint32_t millisec, int32_t* countersAvailable)
 {
     palStatus_t status = PAL_SUCCESS;
-    // TODO
+    palSemaphore_t *semaphore = NULL;
+    int32_t tmpCounters = 0;
+    int block = (millisec == PAL_RTOS_WAIT_FOREVER || millisec != 0) ? 1 : 0;
+
+    if (NULLPTR == semaphoreID)
+        return PAL_ERR_INVALID_ARGUMENT;
+
+    sema_t *sema = (sema_t *)semaphore->semaphoreID;
+
+    if (sema->state != SEMA_OK)
+        status = PAL_ERR_GENERIC_FAILURE;
+
+    if (status == PAL_SUCCESS)
+    {
+        int didBlock = block;
+        unsigned irqmask = cpu_irq_disable();
+        while ((sema->value == 0) && block)
+        {
+            cpu_irq_restore(irqmask);
+            if (millisec == PAL_RTOS_WAIT_FOREVER)
+            {
+                mutex_lock(&sema->mutex);
+            }
+            else
+            {
+                uint32_t start = pal_plat_osKernelSysTick();
+                pal_plat_osMutexLockTimeout((palMutexID_t)&sema->mutex, millisec);
+                uint32_t elapsed = pal_plat_osKernelSysTick() - start;
+                if (elapsed < millisec)
+                {
+                    millisec -= elapsed;
+                }
+                else
+                {
+                    block = 0;
+                }
+            }
+
+            if (sema->state != SEMA_OK)
+            {
+                mutex_unlock(&sema->mutex);
+                status = PAL_ERR_GENERIC_FAILURE;
+                goto end;
+            }
+
+            irqmask = cpu_irq_disable();
+        }
+
+        if (sema->value == 0)
+        {
+            cpu_irq_restore(irqmask);
+            status = (didBlock) ? PAL_ERR_TIMEOUT_EXPIRED : PAL_ERR_GENERIC_FAILURE;
+            goto end;
+        }
+
+        tmpCounters = --sema->value;
+        cpu_irq_restore(irqmask);
+
+        if (countersAvailable != NULL)
+        {
+            *countersAvailable = tmpCounters;
+        }
+
+        if (didBlock && tmpCounters > 0)
+        {
+            mutex_unlock(&sema->mutex);
+        }
+    }
+
+end:
     return status;
 }
 
@@ -313,9 +496,7 @@ palStatus_t pal_plat_osSemaphoreRelease(palSemaphoreID_t semaphoreID)
     int res = 0;
 
     if (semaphoreID == NULLPTR)
-    {
         return PAL_ERR_INVALID_ARGUMENT;
-    }
 
     semaphore = (palSemaphore_t *)semaphoreID;
 
@@ -343,9 +524,7 @@ palStatus_t pal_plat_osSemaphoreDelete(palSemaphoreID_t* semaphoreID)
     palSemaphore_t *semaphore = NULL;
 
     if (semaphoreID == NULL || *semaphoreID == NULLPTR)
-    {
         return PAL_ERR_INVALID_ARGUMENT;
-    }
 
     semaphore = (palSemaphore_t *)*semaphoreID;
     if (semaphore->semaphoreID != NULLPTR)
@@ -412,9 +591,8 @@ PAL_PRIVATE void *osMutexCreate(void)
 {
     mutex_t *mutex = (mutex_t*)malloc(sizeof(mutex_t));
     if (mutex == NULL)
-    {
         return NULLPTR;
-    }
+
     mutex_init(mutex);
     return (void *)mutex;
 }
