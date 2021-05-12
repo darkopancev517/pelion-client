@@ -6,16 +6,17 @@
 
 void *pal_plat_malloc(size_t len)
 {
-    return NULL;
+    return (void *)malloc(len);
 }
 
 void pal_plat_free(void *buffer)
 {
-    (void)buffer;
+    free(buffer);
 }
 
 palStatus_t pal_plat_osRandomBuffer(uint8_t *randomBuf, size_t bufSizeBytes, size_t* actualRandomSizeBytes)
 {
     palStatus_t status = PAL_SUCCESS;
+    // TODO
     return status;
 }

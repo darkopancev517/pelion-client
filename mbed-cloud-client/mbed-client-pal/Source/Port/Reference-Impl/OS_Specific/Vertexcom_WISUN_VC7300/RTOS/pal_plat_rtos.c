@@ -9,11 +9,6 @@
 
 #define TRACE_GROUP "PAL"
 
-#define PAL_RTOS_TRANSLATE_CMSIS_ERROR_CODE(cmsisCode)\
-    ((int32_t)(cmsisCode + PAL_ERR_RTOS_ERROR_BASE))
-
-#define PAL_TICK_TO_MILLI_FACTOR 1000
-
 typedef struct palMutex
 {
     palMutexID_t mutexID;
@@ -33,12 +28,6 @@ typedef struct palThreadData
     palThreadFuncPtr userFunction;
     void *userFunctionArgument;
 } palThreadData_t;
-
-typedef struct palTimer
-{
-    palTimerID_t timerID;
-    void *functionArgs;
-} palTimer_t;
 
 #define PAL_MAX_CONCURRENT_THREADS 8
 
@@ -69,6 +58,7 @@ PAL_PRIVATE PAL_INLINE palThreadData_t** threadAllocate(void);
 PAL_PRIVATE void *osMutexCreate(void);
 PAL_PRIVATE void osMutexDestroy(uintptr_t mutexID);
 PAL_PRIVATE void *osSemaphoreCreate(unsigned int value);
+PAL_PRIVATE void osSemaphoreDestroy(uintptr_t semaID);
 PAL_PRIVATE PAL_INLINE uint32_t pal_plat_GetIPSR(void);
 PAL_PRIVATE void *threadFunction(void *arg);
 
@@ -360,7 +350,7 @@ palStatus_t pal_plat_osSemaphoreDelete(palSemaphoreID_t* semaphoreID)
     semaphore = (palSemaphore_t *)*semaphoreID;
     if (semaphore->semaphoreID != NULLPTR)
     {
-        sema_destroy((sema_t *)semaphore->semaphoreID);
+        osSemaphoreDestroy(semaphore->semaphoreID);
         free(semaphore);
         *semaphoreID = NULLPTR;
         status = PAL_SUCCESS;
@@ -433,9 +423,8 @@ PAL_PRIVATE void osMutexDestroy(uintptr_t mutexID)
 {
     mutex_t *mutex = (mutex_t *)mutexID;
     if (mutex == NULL)
-    {
         return;
-    }
+
     mutex_unlock(mutex);
     free(mutex);
 }
@@ -444,11 +433,20 @@ PAL_PRIVATE void *osSemaphoreCreate(unsigned int value)
 {
     sema_t *sema = (sema_t *)malloc(sizeof(sema_t));
     if (sema == NULL)
-    {
         return NULLPTR;
-    }
+
     sema_create(sema, value);
     return (void *)sema;
+}
+
+PAL_PRIVATE void osSemaphoreDestroy(uintptr_t semaID)
+{
+    sema_t *sema = (sema_t *)semaID;
+    if (sema == NULL)
+        return;
+
+    sema_destroy(sema);
+    free(sema);
 }
 
 PAL_PRIVATE PAL_INLINE uint32_t pal_plat_GetIPSR(void)
