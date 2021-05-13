@@ -1,6 +1,7 @@
 #include "pal.h"
 #include "pal_plat_rtos.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <vcrtos/thread.h>
 #include <vcrtos/mutex.h>
@@ -35,6 +36,7 @@ typedef struct
     mutex_t *mutex;
     thread_t *thread;
     volatile uint8_t dequeued;
+    volatile uint8_t blocking;
 } mutex_thread_t;
 
 #define PAL_MAX_CONCURRENT_THREADS 8
@@ -270,23 +272,54 @@ PAL_PRIVATE void _mutex_timeout(const void *arg)
 {
     unsigned int irqmask = cpu_irq_disable();
     mutex_thread_t *mt = (mutex_thread_t *)arg;
+    mt->blocking = 0;
     _mutex_remove_thread_from_queue(mt->mutex, mt->thread, &mt->dequeued);
     cpu_irq_restore(irqmask);
 }
 
-palStatus_t pal_plat_osMutexLockTimeout(palMutexID_t mutexID, uint32_t timeout)
+static int _mutex_lock_internal(mutex_t *mutex, volatile uint8_t *blocking)
+{
+    unsigned irqmask = cpu_irq_disable();
+
+    if (mutex->queue.next == NULL)
+    {
+        mutex->queue.next = MUTEX_LOCKED;
+        cpu_irq_restore(irqmask);
+        return 1;
+    }
+    else if (*blocking)
+    {
+        thread_t *me = thread_current();
+        thread_scheduler_set_status(me, THREAD_STATUS_MUTEX_BLOCKED);
+        if (mutex->queue.next == MUTEX_LOCKED)
+        {
+            mutex->queue.next = (list_node_t *)&me->runqueue_entry;
+            mutex->queue.next->next = NULL;
+        }
+        else
+        {
+            thread_add_to_list(&mutex->queue, me);
+        }
+        cpu_irq_restore(irqmask);
+        thread_arch_yield_higher();
+        return 1;
+    }
+    else
+    {
+        cpu_irq_restore(irqmask);
+        return 0;
+    }
+}
+
+int _osMutexLockTimeout(palMutexID_t mutexID, uint32_t timeout)
 {
     palStatus_t status = PAL_SUCCESS;
-    mutex_t *mutex = NULL;
 
-    if (mutexID == NULLPTR)
-        return PAL_ERR_INVALID_ARGUMENT;
+    mutex_t *mutex = (mutex_t *)((palMutex_t *)mutexID)->mutexID;
 
-    mutex = (mutex_t *)((palMutex_t *)mutexID)->mutexID;
-
-    thread_t *curr = thread_current();
-
-    mutex_thread_t mt = { mutex, curr, .dequeued=0 };
+    mutex_thread_t mt = {
+        mutex, thread_current(), .dequeued = 0, .blocking = 1
+    };
 
     if (timeout != 0)
     {
@@ -297,27 +330,17 @@ palStatus_t pal_plat_osMutexLockTimeout(palMutexID_t mutexID, uint32_t timeout)
             status = pal_osTimerStart(mutex_timer, timeout);
             if (status == PAL_SUCCESS)
             {
-                mutex_lock(mutex);
+                int ret = _mutex_lock_internal(mutex, &mt.blocking);
+                if (ret == 0)
+                    return -1;
+
                 pal_osTimerDelete(&mutex_timer);
-                if (mt.dequeued)
-                {
-                    // mutex was not available within timeout and dequeued
-                    // from the list
-                    status = PAL_ERR_TIMEOUT_EXPIRED;
-                }
+                return -mt.dequeued;
             }
-            else
-            {
-                PAL_LOG_ERR("Rtos mutex timer start failed");
-            }
-        }
-        else
-        {
-            PAL_LOG_ERR("Rtos mutex timer create failed");
         }
     }
 
-    return status;
+    return -1;
 }
 
 palStatus_t pal_plat_osMutexWait(palMutexID_t mutexID, uint32_t millisec)
@@ -336,7 +359,8 @@ palStatus_t pal_plat_osMutexWait(palMutexID_t mutexID, uint32_t millisec)
     }
     else
     {
-        status = pal_plat_osMutexLockTimeout(mutexID, millisec);
+        int ret = _osMutexLockTimeout(mutexID, millisec);
+        printf("_osMutexLockTimeout: return %d\n", ret);
     }
 
     return status;
@@ -441,7 +465,7 @@ palStatus_t pal_plat_osSemaphoreWait(palSemaphoreID_t semaphoreID, uint32_t mill
             else
             {
                 uint32_t start = pal_plat_osKernelSysTick();
-                pal_plat_osMutexLockTimeout((palMutexID_t)&sema->mutex, millisec);
+                block = !_osMutexLockTimeout((palMutexID_t)&sema->mutex, millisec);
                 uint32_t elapsed = pal_plat_osKernelSysTick() - start;
                 if (elapsed < millisec)
                 {
