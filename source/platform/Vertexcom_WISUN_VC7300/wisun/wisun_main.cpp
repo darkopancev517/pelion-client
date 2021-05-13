@@ -199,7 +199,11 @@ int main(void)
         printf("timer1 start failed\n");
     }
 
-    //status = pal_osMutexDelete(&mutex1);
+    status = pal_osMutexWait(testMutex1, PAL_RTOS_WAIT_FOREVER);
+
+    printf("should not reach here\n");
+
+    //status = pal_osMutexDelete(&testMutex1);
 
     //main_arm_pelion_application();
 
