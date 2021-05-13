@@ -593,7 +593,7 @@ PAL_PRIVATE void *osMutexCreate(void)
     if (mutex == NULL)
         return NULLPTR;
 
-    mutex_init(mutex);
+    mutex_init_unlocked(mutex);
     return (void *)mutex;
 }
 
